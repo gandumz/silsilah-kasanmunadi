@@ -208,27 +208,20 @@ let webAppUrl = localStorage.getItem(WEBAPP_KEY)||'';
 const NW=150, NH=56, HGAP=16, VGAP=64;
 
 // ===================== APPS SCRIPT CODE =====================
-const APPS_SCRIPT = `// Silsilah Keluarga — Apps Script v3 (JSONP + Chunk)
-// Deploy sebagai Web App: Execute as Me, Who has access: Anyone
-
-var CHUNK_STORE = {}; // temporary chunk storage
+const APPS_SCRIPT = `var STORE = {};
 
 function doGet(e) {
-  var cb  = e.parameter.callback || '';
-  var act = e.parameter.action   || 'get';
+  var cb  = (e && e.parameter && e.parameter.callback) ? e.parameter.callback : '';
+  var act = (e && e.parameter && e.parameter.action)   ? e.parameter.action   : 'get';
   var out;
 
-  if (act === 'get') {
-    out = getData();
-  } else if (act === 'chunk') {
-    out = receiveChunk(e.parameter);
-  } else if (act === 'finalize') {
-    out = finalizeChunks(e.parameter.sid);
-  } else {
-    out = { status: 'unknown' };
-  }
+  if      (act === 'get')      { out = getData(); }
+  else if (act === 'chunk')    { out = recvChunk(e.parameter); }
+  else if (act === 'finalize') { out = finalize(e.parameter.sid); }
+  else                         { out = { status: 'unknown' }; }
 
   var json = JSON.stringify(out);
+
   if (cb) {
     return ContentService
       .createTextOutput(cb + '(' + json + ');')
@@ -252,38 +245,35 @@ function getData() {
   }
 }
 
-function receiveChunk(p) {
+function recvChunk(p) {
   try {
-    var sid   = p.sid;
-    var i     = parseInt(p.i);
-    var total = parseInt(p.total);
-    var data  = decodeURIComponent(p.data || '');
-    var cache = PropertiesService.getScriptProperties();
-    cache.setProperty('chunk_' + sid + '_' + i, data);
-    cache.setProperty('chunk_' + sid + '_total', String(total));
-    return { status: 'ok', chunk: i };
+    var props = PropertiesService.getScriptProperties();
+    props.setProperty('ck_' + p.sid + '_' + p.i,     decodeURIComponent(p.data || ''));
+    props.setProperty('ck_' + p.sid + '_total', p.total);
+    return { status: 'ok', i: p.i };
   } catch (err) {
     return { status: 'error', msg: String(err) };
   }
 }
 
-function finalizeChunks(sid) {
+function finalize(sid) {
   try {
-    var cache = PropertiesService.getScriptProperties();
-    var total = parseInt(cache.getProperty('chunk_' + sid + '_total') || '0');
-    if (total === 0) return { status: 'error', msg: 'No chunks found for sid: ' + sid };
+    var props = PropertiesService.getScriptProperties();
+    var total = parseInt(props.getProperty('ck_' + sid + '_total') || '0');
+    if (!total) return { status: 'error', msg: 'Chunk tidak ditemukan untuk sid: ' + sid };
+
     var full = '';
     for (var i = 0; i < total; i++) {
-      var part = cache.getProperty('chunk_' + sid + '_' + i);
-      if (part === null) return { status: 'error', msg: 'Missing chunk ' + i };
+      var part = props.getProperty('ck_' + sid + '_' + i);
+      if (part === null) return { status: 'error', msg: 'Chunk ke-' + i + ' hilang' };
       full += part;
     }
-    // Clean up
-    for (var j = 0; j < total; j++) cache.deleteProperty('chunk_' + sid + '_' + j);
-    cache.deleteProperty('chunk_' + sid + '_total');
 
-    var data = JSON.parse(full);
-    var ss   = SpreadsheetApp.getActiveSpreadsheet();
+    for (var j = 0; j < total; j++) props.deleteProperty('ck_' + sid + '_' + j);
+    props.deleteProperty('ck_' + sid + '_total');
+
+    var data  = JSON.parse(full);
+    var ss    = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName('SilsilahData') || ss.insertSheet('SilsilahData');
     sheet.getRange(1, 1).setValue(JSON.stringify(data));
     writeReadable(ss, data);
@@ -301,12 +291,15 @@ function writeReadable(ss, data) {
     var nodes = data.nodes || {};
     Object.keys(nodes).forEach(function(k) {
       var n = nodes[k];
-      sheet.appendRow([n.gencode, n.title, n.name,
-        n.gender==='L'?'Laki-laki':'Perempuan',
-        n.place, n.note, n.parentId||'-', n.spouseId||'-']);
+      sheet.appendRow([
+        n.gencode, n.title, n.name,
+        n.gender === 'L' ? 'Laki-laki' : 'Perempuan',
+        n.place, n.note,
+        n.parentId || '-', n.spouseId || '-'
+      ]);
     });
-  } catch (err) {}
-}`;
+  } catch (err) { /* abaikan */ }
+}`
 
 document.getElementById('apps-script-code').textContent = APPS_SCRIPT;
 
