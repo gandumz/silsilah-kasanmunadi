@@ -10,8 +10,7 @@
       "note": "",
       "children": [
         "n3",
-        "n4",
-        "n5"
+        "n4"
       ],
       "spouseId": null,
       "parentId": null
@@ -34,18 +33,6 @@
       "title": "R.",
       "gender": "L",
       "gencode": "G.1.3",
-      "place": "",
-      "note": "",
-      "children": [],
-      "spouseId": null,
-      "parentId": "n1"
-    },
-    "n5": {
-      "id": "n5",
-      "name": "Tumirah al. Sumohartono",
-      "title": "R. Ngt.",
-      "gender": "P",
-      "gencode": "G.1.4",
       "place": "",
       "note": "",
       "children": [],
