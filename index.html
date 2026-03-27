@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Silsilah Trah Ngali Pawiro</title>
+<title>Silsilah Trah Raden Kasanmunadi</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:system-ui,-apple-system,sans-serif;background:#f0ede8;color:#1a1a18;min-height:100vh;}
@@ -72,7 +72,7 @@ svg#tree{display:block;}
 
 <header>
   <div>
-    <h1>🌳 Silsilah Trah Ngali Pawiro</h1>
+    <h1>🌳 Silsilah Trah Raden Kasanmunadi</h1>
     <p>dari Ngayojokarto Hadiningrat</p>
   </div>
   <div class="hbtns">
@@ -104,7 +104,7 @@ svg#tree{display:block;}
   <label style="font-size:13px;font-weight:500;color:#333;display:block;margin-bottom:3px;">Username GitHub</label>
   <input id="s-user" placeholder="contoh: gandumz"/>
   <label style="font-size:13px;font-weight:500;color:#333;display:block;margin-bottom:3px;">Nama Repository</label>
-  <input id="s-repo" placeholder="contoh: trah-ngali-pawiro"/>
+  <input id="s-repo" placeholder="contoh: silsilah-kasanmunadi"/>
   <div class="setup-btns">
     <button onclick="hideSetup()">Batal</button>
     <button class="ok" onclick="saveSetup()">✓ Simpan & Hubungkan</button>
@@ -172,14 +172,15 @@ svg#tree{display:block;}
 
 <script>
 // ============ CONFIG ============
-const SK = 'trah_ngali_v1';
-const GK = 'trah_ngali_gh';
+const SK = 'trah_kas_v3';
+const GK = 'trah_kas_gh';
 
 // ============ STATE ============
 let nodes={}, idCounter=1, zoom=0.85;
 let modalMode=null, modalPid=null, modalNid=null;
 let collapsed=new Set();
 let ghConfig = JSON.parse(localStorage.getItem(GK)||'{}');
+// token, user, repo, sha (sha of data.json for updates)
 
 const NW=150, NH=56, HG=16, VG=64;
 
@@ -215,31 +216,41 @@ function addSpouse(nid,name,title,gender,gencode,place,note){
 
 // ============ GITHUB API ============
 async function loadFromGitHub(){
-  if(!ghConfig.token){showSetup();return;}
   setStatus('spin','Mengambil data dari GitHub...');
   document.getElementById('load-overlay').classList.remove('hidden');
+  // Gunakan raw URL publik — tidak butuh token, works untuk repo public
+  const user = ghConfig.user || 'gandumz';
+  const repo = ghConfig.repo || 'Trah-Ngali-Pawiro';
   try{
-    const res = await fetch(
-      `https://api.github.com/repos/${ghConfig.user}/${ghConfig.repo}/contents/data.json`,
-      { headers:{ Authorization:'token '+ghConfig.token, Accept:'application/vnd.github.v3+json' } }
-    );
-    if(res.status===404){
+    // Coba raw URL dulu (tidak perlu token, paling cepat)
+    const rawUrl = `https://raw.githubusercontent.com/${user}/${repo}/main/data.json?t=${Date.now()}`;
+    const res = await fetch(rawUrl);
+    if(res.ok){
+      const data = await res.json();
+      nodes = data.nodes; idCounter = data.idCounter||1; collapsed=new Set();
+      // Juga ambil sha jika ada token (untuk keperluan save)
+      if(ghConfig.token){
+        try{
+          const r2 = await fetch(
+            `https://api.github.com/repos/${user}/${repo}/contents/data.json`,
+            { headers:{ Authorization:'token '+ghConfig.token, Accept:'application/vnd.github.v3+json' } }
+          );
+          if(r2.ok){ const j=await r2.json(); ghConfig.sha=j.sha; localStorage.setItem(GK,JSON.stringify(ghConfig)); }
+        }catch(e2){}
+      }
+      saveLocal(); render();
+      setStatus('ok','Data terbaru dari GitHub',new Date().toLocaleTimeString('id-ID'));
+      toast('Data berhasil dimuat','ok');
+    } else if(res.status===404){
       document.getElementById('load-overlay').classList.add('hidden');
-      setStatus('ok','Terhubung — file data.json belum ada');
-      toast('File data.json belum ada. Klik 💾 Simpan untuk membuat.','');
+      setStatus('ok','Terhubung — data.json belum ada');
+      toast('Data belum ada. Klik 💾 Simpan untuk upload pertama kali.','');
       return;
+    } else {
+      throw new Error('HTTP '+res.status);
     }
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const json = await res.json();
-    const data = JSON.parse(atob(json.content.replace(/\n/g,'')));
-    nodes = data.nodes; idCounter = data.idCounter||1; collapsed=new Set();
-    ghConfig.sha = json.sha;
-    localStorage.setItem(GK, JSON.stringify(ghConfig));
-    saveLocal(); render();
-    setStatus('ok','Terhubung ke GitHub',new Date().toLocaleTimeString('id-ID'));
-    toast('Data berhasil dimuat dari GitHub','ok');
   }catch(e){
-    setStatus('err','Gagal terhubung');
+    setStatus('err','Gagal memuat data');
     toast('Gagal: '+e.message,'err');
   }
   document.getElementById('load-overlay').classList.add('hidden');
@@ -308,46 +319,52 @@ function saveSetup(){
   loadFromGitHub();
 }
 
-// ============ SEED DATA (mulai dari R. Ngali) ============
+// ============ SEED DATA ============
 function seedData(){
   nodes={}; idCounter=1; collapsed=new Set();
-  const g1=mk('Ngali','R.','L','G.1','Makam di Secang, Magelang','',null);
-  const g11=addChild(g1,'Mohammad Jupri','R.','L','G.1.1','Riau','');
-  const g12=addChild(g1,'Sri Daryati','Rr.','P','G.1.2','Secang','');
-  const g13=addChild(g1,'Waladunajib','R.','L','G.1.3','Semarang','');
-  const g14=addChild(g1,'Asfarudin','R.','L','G.1.4','Makam di Semarang','');
-  const g15=addChild(g1,'Sri Bariah','Rr.','P','G.1.5','Gombong','');
-  const g16=addChild(g1,'Puguh Sutopo','R.','L','G.1.6','Tempel (istri ke-2)','');
-  addSpouse(g12,'Sukandar Budiharjo','','L','','','');
-  addSpouse(g15,'Kusno','','L','','','');
-  addSpouse(g16,'Tini Sutini','','P','','','');
-  addChild(g12,'Alwi Prihatin','R.','L','G.1.2.1','','');
-  addChild(g12,'Sri Suyatmiati','Rr.','P','G.1.2.2','','');
-  addChild(g12,'Adi Sofyan','R.','L','G.1.2.3','','');
-  addChild(g12,'Sri Subekti','Rr.','P','G.1.2.4','','');
-  addChild(g12,'Joko Panulung','R.','L','G.1.2.5','','');
-  addChild(g12,'Sri Wahyuti Pamungkas','Rr.','P','G.1.2.6','','');
-  addChild(g13,'Agus','R.','L','G.1.3.1','','');
-  addChild(g13,'(belum tercatat)','','L','G.1.3.2','','');
-  addChild(g13,'Wawan','R.','L','G.1.3.3','','');
-  addChild(g13,'(belum tercatat)','','L','G.1.3.4','','');
-  addChild(g14,'Unggul Pujianto','R.','L','G.1.4.1','','');
-  addChild(g14,'Dwi Romadhoni Raharjo','R.','L','G.1.4.2','','');
-  addChild(g14,'Hepi Triono','R.','L','G.1.4.3','','');
-  addChild(g14,'Catur Riani Fitri Astuti','Rr.','P','G.1.4.4','','');
-  addChild(g15,'Budi Mulyono','R.','L','G.1.5.1','','');
-  addChild(g15,'(belum tercatat)','','L','G.1.5.2','','');
-  addChild(g15,'(belum tercatat)','','L','G.1.5.3','','');
-  addChild(g15,'(belum tercatat)','','L','G.1.5.4','','');
-  const g161=addChild(g16,'Akhmad Fajar Riyadini','R.','L','G.1.6.1','','');
-  const g162=addChild(g16,'Yusuf Nurseto Aji','R.','L','G.1.6.2','','');
-  const g163=addChild(g16,'Aisyah Amani Tri Ostika Wati','Rr.','P','G.1.6.3','','');
-  addSpouse(g161,'Dwi Ratmisari','','P','','','');
-  addSpouse(g162,'Vera Dwi Anggraeni','','P','','','');
-  addSpouse(g163,'Purwanto','','L','','','');
-  addChild(g161,'Xavier Attarazka Akhmad','R.','L','G.1.6.1.1','','');
-  addChild(g162,'Aksara Nawasena Yusuf','R.','L','G.1.6.2.1','','');
-  addChild(g163,'Muhammad Haidar Alfarizi Purwanto','R.','L','G.1.6.3.1','','');
+  const g1=mk('Kasanmunadi','R.','L','G.1','Abdi Dalem Jajar Suronata, Yogyakarta · Makam Kuncen','',null);
+  const g13=addChild(g1,'Supingah al. Pawiroditoto','R. Ngt.','P','G.1.2','','');
+  addChild(g1,'Pingi al. Notodiguno','R.','L','G.1.1','','');
+  addChild(g1,'Jumaron al. Somodisastro','R.','L','G.1.3','','');
+  addChild(g1,'Tumirah al. Sumohartono','R. Ngt.','P','G.1.4','','');
+  addChild(g1,'Ngaidah al. Harjopranoto','R. Ngt.','P','G.1.5','','');
+  const g121=addChild(g13,'Ngali','R.','L','G.1.2.1','Makam di Secang Magelang','');
+  const g1211=addChild(g121,'Mohammad Jupri','R.','L','G.1.2.1.1','Riau','');
+  const g1212=addChild(g121,'Sri Daryati','Rr.','P','G.1.2.1.2','Secang','');
+  const g1213=addChild(g121,'Waladunajib','R.','L','G.1.2.1.3','Semarang','');
+  const g1214=addChild(g121,'Asfarudin','R.','L','G.1.2.1.4','Makam di Semarang','');
+  const g1215=addChild(g121,'Sri Bariah','Rr.','P','G.1.2.1.5','Gombong','');
+  const g1216=addChild(g121,'Puguh Sutopo','R.','L','G.1.2.1.6','Tempel (istri ke-2)','');
+  addSpouse(g1212,'Sukandar Budiharjo','','L','','','');
+  addSpouse(g1215,'Kusno','','L','','','');
+  addSpouse(g1216,'Tini Sutini','','P','','','');
+  addChild(g1212,'Alwi Prihatin','R.','L','G.1.2.1.2.1','','');
+  addChild(g1212,'Sri Suyatmiati','Rr.','P','G.1.2.1.2.2','','');
+  addChild(g1212,'Adi Sofyan','R.','L','G.1.2.1.2.3','','');
+  addChild(g1212,'Sri Subekti','Rr.','P','G.1.2.1.2.4','','');
+  addChild(g1212,'Joko Panulung','R.','L','G.1.2.1.2.5','','');
+  addChild(g1212,'Sri Wahyuti Pamungkas','Rr.','P','G.1.2.1.2.6','','');
+  addChild(g1213,'Agus','R.','L','G.1.2.1.3.1','','');
+  addChild(g1213,'(belum tercatat)','','L','G.1.2.1.3.2','','');
+  addChild(g1213,'Wawan','R.','L','G.1.2.1.3.3','','');
+  addChild(g1213,'(belum tercatat)','','L','G.1.2.1.3.4','','');
+  addChild(g1214,'Unggul Pujianto','R.','L','G.1.2.1.4.1','','');
+  addChild(g1214,'Dwi Romadhoni Raharjo','R.','L','G.1.2.1.4.2','','');
+  addChild(g1214,'Hepi Triono','R.','L','G.1.2.1.4.3','','');
+  addChild(g1214,'Catur Riani Fitri Astuti','Rr.','P','G.1.2.1.4.4','','');
+  addChild(g1215,'Budi Mulyono','R.','L','G.1.2.1.5.1','','');
+  addChild(g1215,'(belum tercatat)','','L','G.1.2.1.5.2','','');
+  addChild(g1215,'(belum tercatat)','','L','G.1.2.1.5.3','','');
+  addChild(g1215,'(belum tercatat)','','L','G.1.2.1.5.4','','');
+  const g12161=addChild(g1216,'Akhmad Fajar Riyadini','R.','L','G.1.2.1.6.1','','');
+  const g12162=addChild(g1216,'Yusuf Nurseto Aji','R.','L','G.1.2.1.6.2','','');
+  const g12163=addChild(g1216,'Aisyah Amani Tri Ostika Wati','Rr.','P','G.1.2.1.6.3','','');
+  addSpouse(g12161,'Dwi Ratmisari','','P','','','');
+  addSpouse(g12162,'Vera Dwi Anggraeni','','P','','','');
+  addSpouse(g12163,'Purwanto','','L','','','');
+  addChild(g12161,'Xavier Attarazka Akhmad','R.','L','G.1.2.1.6.1.1','','');
+  addChild(g12162,'Aksara Nawasena Yusuf','R.','L','G.1.2.1.6.2.1','','');
+  addChild(g12163,'Muhammad Haidar Alfarizi Purwanto','R.','L','G.1.2.1.6.3.1','','');
 }
 
 // ============ LAYOUT ============
@@ -404,6 +421,7 @@ function render(){
   svg.setAttribute('viewBox',`0 0 ${mx} ${my}`);
   const isSp=id=>Object.values(nodes).some(o=>o.spouseId===id);
 
+  // Lines
   const lg=el('g');
   Object.values(nodes).forEach(n=>{
     const p=pos[n.id]; if(!p) return;
@@ -430,6 +448,7 @@ function render(){
   });
   svg.appendChild(lg);
 
+  // Nodes
   const ng2=el('g');
   Object.values(nodes).forEach(n=>{
     const p=pos[n.id]; if(!p) return;
@@ -532,7 +551,7 @@ function exportHTML(){
   html=html.replace('</head>',ds+'</head>');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  a.download='silsilah-trah-ngali-'+new Date().toISOString().slice(0,10)+'.html';
+  a.download='silsilah-kasanmunadi-'+new Date().toISOString().slice(0,10)+'.html';
   a.click();
   toast('HTML didownload','ok');
 }
@@ -555,13 +574,10 @@ if(typeof PRELOAD!=='undefined'){
   seedData();
 }
 
-if(ghConfig.token){
-  setStatus('spin','Menghubungkan ke GitHub...');
-  loadFromGitHub();
-} else {
-  setStatus('','Belum terhubung — klik ⚙️ Pengaturan');
-}
-render();
+// Selalu load data terbaru dari GitHub saat buka halaman
+// Tidak butuh token untuk baca data (repo public)
+setStatus('spin','Memuat data terbaru...');
+loadFromGitHub().then(()=>render()).catch(()=>render());
 </script>
 </body>
 </html>
