@@ -512,7 +512,7 @@
       "children": [
         "n45"
       ],
-      "spouseId": null,
+      "spouseId": "n46",
       "parentId": "n14"
     },
     "n42": {
@@ -562,7 +562,19 @@
       "children": [],
       "spouseId": null,
       "parentId": "n39"
+    },
+    "n46": {
+      "id": "n46",
+      "name": "Gloria Febriana Christiani",
+      "title": "",
+      "gender": "L",
+      "gencode": "G.1.2.4.1",
+      "place": "",
+      "note": "",
+      "children": [],
+      "spouseId": "n39",
+      "parentId": "n14"
     }
   },
-  "idCounter": 46
+  "idCounter": 47
 }
