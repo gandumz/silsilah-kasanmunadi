@@ -6,13 +6,12 @@
       "title": "R.",
       "gender": "L",
       "gencode": "G.1",
-      "place": "Abdi Dalem Jajar Suronata, Yogyakarta ÃÂÃÂ· Makam Kuncen",
+      "place": "Abdi Dalem Jajar Suronata, Yogyakarta ÃÂÃÂÃÂÃÂ· Makam Kuncen",
       "note": "",
       "children": [
         "n3",
         "n4",
-        "n5",
-        "n6"
+        "n5"
       ],
       "spouseId": null,
       "parentId": null
@@ -47,18 +46,6 @@
       "title": "R. Ngt.",
       "gender": "P",
       "gencode": "G.1.4",
-      "place": "",
-      "note": "",
-      "children": [],
-      "spouseId": null,
-      "parentId": "n1"
-    },
-    "n6": {
-      "id": "n6",
-      "name": "Ngaidah al. Harjopranoto",
-      "title": "R. Ngt.",
-      "gender": "P",
-      "gencode": "G.1.5",
       "place": "",
       "note": "",
       "children": [],
