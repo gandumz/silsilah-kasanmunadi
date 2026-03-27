@@ -506,9 +506,21 @@
       "place": "",
       "note": "",
       "children": [],
-      "spouseId": null,
+      "spouseId": "n40",
+      "parentId": "n14"
+    },
+    "n40": {
+      "id": "n40",
+      "name": "Alya Isnaeni Putri",
+      "title": "Rr.",
+      "gender": "P",
+      "gencode": "G.1.2.4.2",
+      "place": "",
+      "note": "",
+      "children": [],
+      "spouseId": "n39",
       "parentId": "n14"
     }
   },
-  "idCounter": 40
+  "idCounter": 41
 }
