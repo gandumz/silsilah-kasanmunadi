@@ -6,7 +6,7 @@
       "title": "R.",
       "gender": "L",
       "gencode": "G.1",
-      "place": "Abdi Dalem Jajar Suronata, Yogyakarta Â· Makam Kuncen",
+      "place": "Abdi Dalem Jajar Suronata, Yogyakarta ÃÂ· Makam Kuncen",
       "note": "",
       "children": [
         "n2",
@@ -159,7 +159,8 @@
         "n27",
         "n28",
         "n29",
-        "n30"
+        "n30",
+        "n44"
       ],
       "spouseId": null,
       "parentId": "n7"
@@ -562,7 +563,19 @@
       "children": [],
       "spouseId": null,
       "parentId": "n37"
+    },
+    "n44": {
+      "id": "n44",
+      "name": "Ranto",
+      "title": "R",
+      "gender": "L",
+      "gencode": "G.1.2.1.4.5",
+      "place": "",
+      "note": "",
+      "children": [],
+      "spouseId": null,
+      "parentId": "n11"
     }
   },
-  "idCounter": 44
+  "idCounter": 45
 }
