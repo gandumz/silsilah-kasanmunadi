@@ -9,8 +9,7 @@
       "place": "Abdi Dalem Jajar Suronata, Yogyakarta ÃÂÃÂÃÂÃÂ· Makam Kuncen",
       "note": "",
       "children": [
-        "n3",
-        "n4"
+        "n3"
       ],
       "spouseId": null,
       "parentId": null
@@ -21,18 +20,6 @@
       "title": "R.",
       "gender": "L",
       "gencode": "G.1.1",
-      "place": "",
-      "note": "",
-      "children": [],
-      "spouseId": null,
-      "parentId": "n1"
-    },
-    "n4": {
-      "id": "n4",
-      "name": "Jumaron al. Somodisastro",
-      "title": "R.",
-      "gender": "L",
-      "gencode": "G.1.3",
       "place": "",
       "note": "",
       "children": [],
